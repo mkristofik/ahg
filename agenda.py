@@ -83,6 +83,8 @@ def extract_badges(page):
             elif len(row) > 1 and 'Sports Pin' in row[1]:
                 yield ('badge', badge + ' pin')
             else:
+                if 'Rocker:' in badge:
+                    badge = re.sub(r'Rocker: (.+)', r'\1 Rocker', badge)
                 yield ('badge', badge)
 
 
