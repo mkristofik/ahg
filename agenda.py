@@ -86,16 +86,16 @@ def extract_badges(page):
                 yield ('badge', badge)
 
 
-def print_joining_awards(names):
-    print('Joining Awards')
+def print_joining_awards(f, names):
+    print('<h3>Joining Awards</h3>', file=f)
     for n in names:
-        print(n)
+        print(n + '<br />', file=f)
 
 
-def print_pathfinder_beads(girls):
-    print('Pathfinder: Beads')
+def print_pathfinder_beads(f, girls):
+    print('<h3>Pathfinder: Beads</h3>', file=f)
     for girl in girls:
-        print(girl['name'] + ': ', end='')
+        print('<b>' + girl['name'] + ':</b> ', end='', file=f)
         beads = []
         if girl['steppingStones'] > 1:
             beads.append('{} Stepping Stones beads'.format(girl['steppingStones']))
@@ -113,27 +113,26 @@ def print_pathfinder_beads(girls):
             beads.append('{} red Bible verse beads'.format(girl['bibleVerseBeads']))
         elif girl['bibleVerseBeads'] == 1:
             beads.append('1 red Bible verse bead')
-        print(', '.join(beads))
+        print(', '.join(beads) + '<br />', file=f)
 
 
-def print_badges(badges):
+def print_badges(f, badges):
     for lvl in levels:
         if lvl == 'Pathfinder':
-            print_pathfinder_beads(badges[lvl])
+            print_pathfinder_beads(f, badges[lvl])
         else:
-            print()
-            print(lvl + ': Badges and Service Stars')
+            print('<h3>' + lvl + ': Badges and Service Stars</h3>', file=f)
             for girl in badges[lvl]:
-                print(girl['name'] + ': ', end='')
+                print('<b>' + girl['name'] + ':</b> ', end='', file=f)
                 badgesToPrint = list(girl['badges'])
                 if girl['serviceStars'] > 1:
                     badgesToPrint.append('{} service stars'.format(girl['serviceStars']))
                 elif girl['serviceStars'] == 1:
                     badgesToPrint.append('1 service star')
-                print(', '.join(badgesToPrint))
+                print(', '.join(badgesToPrint) + '<br />', file=f)
 
 
-def print_level_awards(levelAwards):
+def print_level_awards(f, levelAwards):
     awardNames = {
             'Pathfinder': 'Fanny Crosby',
             'Tenderheart': 'Sacagawea',
@@ -141,13 +140,13 @@ def print_level_awards(levelAwards):
             'Pioneer': 'Harriet Tubman',
             'Patriot': 'Abigail Adams'
             }
-    print('Level Awards')
+    print('<h3>Level Awards</h3>', file=f)
     for lvl in levels:
         if lvl not in levelAwards:
             continue
-        print(lvl, awardNames[lvl], 'Level Award')
+        print('<h4>' + lvl, awardNames[lvl], 'Level Award</h4>', file=f)
         for name in levelAwards[lvl]:
-            print(name)
+            print(name + '<br />', file=f)
 
 
 if __name__ == '__main__':
@@ -160,7 +159,6 @@ if __name__ == '__main__':
     curGirl = {}
     for page in reader.pages:
         for itemType, title in extract_badges(page):
-            #print(itemType, title)
             if itemType == 'unit':
                 curUnit = title
             elif itemType == 'girl':
@@ -196,8 +194,7 @@ if __name__ == '__main__':
     # Don't forget the last girl on the last page
     badges[curGirl['unit']].append(curGirl)
 
-    print_joining_awards(joiningAwards)
-    print()
-    print_badges(badges)
-    print()
-    print_level_awards(levelAwards)
+    with open('agenda.html', 'w') as f:
+        print_joining_awards(f, joiningAwards)
+        print_badges(f, badges)
+        print_level_awards(f, levelAwards)
