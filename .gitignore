@@ -1,3 +1,4 @@
 *.pdf
 *.html
 *.csv
+__pycache__/
