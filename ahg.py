@@ -57,3 +57,39 @@ class Roster:
                 if not row:
                     continue
                 yield (row['name'], int(row['grade']))
+
+
+class Badges:
+    def __init__(self):
+        self._completed = defaultdict(list)  # {girl : (date, badge name)}
+        self._incomplete = defaultdict(list)  # {girl : badge name}
+
+        for badge in self._load_from_file():
+            if badge['date']:
+                self._completed[badge['girl']].append((badge['date'], badge['name']))
+            else:
+                self._incomplete[badge['girl']].append(badge['name'])
+
+    def has_hugs_patch(self, girl, unitStartDate):
+        for badgeDate, badgeName in self._completed[girl]:
+            if badgeDate < unitStartDate:
+                continue
+            if 'HUGS' in badgeName:
+                return True
+        return False
+
+    def _load_from_file(self):
+        with open('badge_book.csv') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                pct = row['percent_complete']
+                if not pct or int(pct) == 0:
+                    continue
+                completionDate = row['completed_on']
+                if completionDate:
+                    completionDate = date.fromisoformat(completionDate)
+                yield {
+                        'girl': row['user_name'],
+                        'name': row['name'],
+                        'date': completionDate
+                        }
