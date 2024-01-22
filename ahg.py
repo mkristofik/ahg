@@ -41,9 +41,7 @@ class Roster:
     def start_of_unit(self, girl):
         """June 1st of the year the girl started in her current unit."""
         grade = self._gradeLevels[girl]
-        if grade >= 9:  # Patriot
-            return start_of_program_year(grade - 9)
-        elif grade >= 7:  # Pioneer
+        if grade >= 7:  # Pioneer/Patriot
             return start_of_program_year(grade - 7)
         elif grade >= 4:  # Explorer
             return start_of_program_year(grade - 4)
@@ -70,11 +68,17 @@ class Badges:
             else:
                 self._incomplete[badge['girl']].append(badge['name'])
 
+    def has_national_day_of_service(self, girl, unitStartDate):
+        return self._has_badge(girl, unitStartDate, 'National')
+
     def has_hugs_patch(self, girl, unitStartDate):
+        return self._has_badge(girl, unitStartDate, 'HUGS')
+
+    def _has_badge(self, girl, unitStartDate, partialName):
         for badgeDate, badgeName in self._completed[girl]:
             if badgeDate < unitStartDate:
                 continue
-            if 'HUGS' in badgeName:
+            if partialName in badgeName:
                 return True
         return False
 
