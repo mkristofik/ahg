@@ -38,9 +38,12 @@ class Roster:
     def names(self):
         return self._gradeLevels.keys()
 
+    def grade_level(self, girl):
+        return self._gradeLevels[girl]
+
     def start_of_unit(self, girl):
         """June 1st of the year the girl started in her current unit."""
-        grade = self._gradeLevels[girl]
+        grade = self.grade_level(girl)
         if grade >= 7:  # Pioneer/Patriot
             return start_of_program_year(grade - 7)
         elif grade >= 4:  # Explorer
@@ -74,6 +77,14 @@ class Badges:
     def has_hugs_patch(self, girl, unitStartDate):
         return self._has_badge(girl, unitStartDate, 'HUGS')
 
+    def all_incomplete(self, girl, grade):
+        unit = self._current_unit_tag(grade)
+        others = self._other_unit_tags(grade)
+        for badge in self._incomplete[girl]:
+            if any(tag in badge for tag in others):
+                continue
+            yield badge.removesuffix(unit)
+
     def _has_badge(self, girl, unitStartDate, partialName):
         for badgeDate, badgeName in self._completed[girl]:
             if badgeDate < unitStartDate:
@@ -81,6 +92,22 @@ class Badges:
             if partialName in badgeName:
                 return True
         return False
+
+    def _current_unit_tag(self, grade):
+        if grade >= 7:
+            return ' (Pi/Pa)'
+        elif grade >= 4:
+            return ' (E)'
+        else:
+            return ' (T)'
+
+    def _other_unit_tags(self, grade):
+        if grade >= 7:  # Pioneer/Patriot
+            return ['(T)', '(E)']
+        elif grade >= 4:  # Explorer
+            return ['(T)', '(Pi/Pa)']
+        else:  # Tenderheart
+            return ['(E)', '(Pi/Pa)']
 
     def _load_from_file(self):
         with open('badge_book.csv') as f:
@@ -92,6 +119,8 @@ class Badges:
                 completionDate = row['completed_on']
                 if completionDate:
                     completionDate = date.fromisoformat(completionDate)
+                elif 'Level Award' in row['achievement_type']:
+                    continue
                 yield {
                         'girl': row['user_name'],
                         'name': row['name'],
