@@ -6,7 +6,6 @@ import ahg
 if __name__ == '__main__':
     projects = ahg.load_service_projects()
     roster = ahg.Roster()
-    badges = ahg.Badges()
 
     # If you have a HUGS patch while in your current unit, and you earn it
     # again, you get a rocker.
@@ -14,7 +13,7 @@ if __name__ == '__main__':
         events = projects[girl]
         if len(events) < 3:
             continue
-        if badges.has_hugs_patch(girl, roster.start_of_unit(girl)):
+        if roster.has_hugs_patch(girl):
             print(girl, '(*)')
         else:
             print(girl)

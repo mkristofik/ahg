@@ -9,13 +9,12 @@ import ahg
 if __name__ == '__main__':
     projects = ahg.load_service_projects()
     roster = ahg.Roster()
-    badges = ahg.Badges()
     patches = []
     rockers = []
     for girl in roster.names():
         if not any('National' in eventName for _, eventName in projects[girl]):
             continue
-        if badges.has_national_day_of_service(girl, roster.start_of_unit(girl)):
+        if roster.has_national_day_of_service(girl):
             rockers.append(girl)
         else:
             patches.append(girl)

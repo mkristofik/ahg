@@ -34,6 +34,9 @@ def load_service_projects():
 class Roster:
     def __init__(self):
         self._gradeLevels = dict(self._load_from_file())
+        self._completed = defaultdict(list)  # {girl : (date, badge name)}
+        self._incomplete = defaultdict(list)  # {girl : badge name}
+        self._load_badges()
 
     def names(self):
         return self._gradeLevels.keys()
@@ -51,33 +54,14 @@ class Roster:
         else:  # Tenderheart
             return start_of_program_year(grade - 1)
 
-    def _load_from_file(self):
-        with open('roster.csv') as f:
-            reader = csv.DictReader(f)
-            for row in reader:
-                if not row:
-                    continue
-                yield (row['name'], int(row['grade']))
+    def has_national_day_of_service(self, girl):
+        return self._has_badge(girl, 'National')
 
+    def has_hugs_patch(self, girl):
+        return self._has_badge(girl, 'HUGS')
 
-class Badges:
-    def __init__(self):
-        self._completed = defaultdict(list)  # {girl : (date, badge name)}
-        self._incomplete = defaultdict(list)  # {girl : badge name}
-
-        for badge in self._load_from_file():
-            if badge['date']:
-                self._completed[badge['girl']].append((badge['date'], badge['name']))
-            else:
-                self._incomplete[badge['girl']].append(badge['name'])
-
-    def has_national_day_of_service(self, girl, unitStartDate):
-        return self._has_badge(girl, unitStartDate, 'National')
-
-    def has_hugs_patch(self, girl, unitStartDate):
-        return self._has_badge(girl, unitStartDate, 'HUGS')
-
-    def all_incomplete(self, girl, grade):
+    def incomplete_badges(self, girl):
+        grade = self.grade_level(girl)
         unit = self._current_unit_tag(grade)
         others = self._other_unit_tags(grade)
         for badge in self._incomplete[girl]:
@@ -85,7 +69,8 @@ class Badges:
                 continue
             yield badge.removesuffix(unit)
 
-    def _has_badge(self, girl, unitStartDate, partialName):
+    def _has_badge(self, girl, partialName):
+        unitStartDate = self.start_of_unit(girl)
         for badgeDate, badgeName in self._completed[girl]:
             if badgeDate < unitStartDate:
                 continue
@@ -110,19 +95,27 @@ class Badges:
             return ['(E)', '(Pi/Pa)']
 
     def _load_from_file(self):
+        with open('roster.csv') as f:
+            reader = csv.DictReader(f)
+            for row in reader:
+                if not row:
+                    continue
+                yield (row['name'], int(row['grade']))
+
+    def _load_badges(self):
         with open('badge_book.csv') as f:
             reader = csv.DictReader(f)
             for row in reader:
                 pct = row['percent_complete']
                 if not pct or int(pct) == 0:
                     continue
+                if 'Level Award' in row['achievement_type']:
+                    continue
+                girl = row['user_name']
+                badge = row['name']
                 completionDate = row['completed_on']
                 if completionDate:
                     completionDate = date.fromisoformat(completionDate)
-                elif 'Level Award' in row['achievement_type']:
-                    continue
-                yield {
-                        'girl': row['user_name'],
-                        'name': row['name'],
-                        'date': completionDate
-                        }
+                    self._completed[girl].append((completionDate, badge))
+                else:
+                    self._incomplete[girl].append(badge)
