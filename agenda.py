@@ -1,6 +1,7 @@
 from collections import defaultdict
 from pypdf import PdfReader
 import re
+import webbrowser
 
 
 levels = ('Pathfinder', 'Tenderheart', 'Explorer', 'Pioneer', 'Patriot')
@@ -200,3 +201,4 @@ if __name__ == '__main__':
         print_joining_awards(f, joiningAwards)
         print_badges(f, badges)
         print_level_awards(f, levelAwards)
+    webbrowser.open('agenda.html', new=2)

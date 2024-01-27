@@ -2,6 +2,8 @@
 
 ## Court of Awards Agenda
 
+_Dependencies:_ [pypdf](https://pypi.org/project/pypdf/)
+
 - From TroopTrack dashboard page, click on Achieve > Print Agenda by Unit.
 - Save file as **award_agenda_by_scout.pdf** to this directory.
 - Run `python agenda.py`.
